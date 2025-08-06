@@ -19,25 +19,31 @@ class PagesController extends Controller
     {
         $today = Carbon::today();
     
-        // Ambil semua ruangan
-        $ruangans = Ruangan::all();
-    
-        // Cek apakah ruangan penuh hari ini
-        $ruangans->map(function ($ruangan) use ($today) {
-            // Hitung total durasi booking hari ini untuk ruangan tersebut
-            $totalDurasi = pemesanan::where('ruangan_id', $ruangan->id)
+        $ruangans = Ruangan::all()->map(function ($ruangan) use ($today) {
+            // Ambil booking terakhir (jam_selesai terbesar) untuk hari ini
+            $lastBooking = Pemesanan::where('ruangan_id', $ruangan->id)
                 ->whereDate('tanggal', $today)
-                ->sum('durasi_jam');
-        
-            // Cek apakah sudah melebihi batas maksimal
-            $ruangan->is_full = $totalDurasi >= $ruangan->max_jam;
-        
+                ->orderByDesc('jam_selesai')
+                ->first();
+    
+            $isFull = false;
+    
+            if ($lastBooking) {
+                $jamSelesai = Carbon::createFromFormat('H:i:s', $lastBooking->jam_selesai);
+                $jamBatas = Carbon::createFromTime(21, 0, 0); // 21:00
+    
+                if ($jamSelesai->greaterThanOrEqualTo($jamBatas)) {
+                    $isFull = true;
+                }
+            }
+    
+            $ruangan->is_full = $isFull;
+    
             return $ruangan;
         });
     
         return view('booking.v_book', compact('ruangans'));
     }
-
     // Users
 
     public function getUsers()

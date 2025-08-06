@@ -25,6 +25,7 @@
                                 <th>No</th>
                                 <th>Nama Ruangan</th>
                                 <th>Maksimal Waktu (jam)</th>
+                                <th>Warna Label</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -34,6 +35,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $ruangan->nama }}</td>
                                     <td>{{ $ruangan->max_jam }} Jam</td>
+                                    <td>{{ $ruangan->warna }}</td>
                                     <td>
                                         <button class="btn btn-warning btn-sm btn-edit" data-id="{{ $ruangan->id }}"
                                             data-nama="{{ $ruangan->nama }}" data-max="{{ $ruangan->max_jam }}">
@@ -73,6 +75,17 @@
                                 <input type="number" class="form-control" name="max_jam" id="max_jam" min="1"
                                     max="24" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="warna" class="form-label">Warna Label</label>
+                                
+                                <!-- Tempat Pickr muncul -->
+                                <div id="warnaPicker"></div>
+                            
+                                <!-- Hidden input untuk simpan HEX ke database -->
+                                <input type="hidden" name="warna" id="warna" value="#198754">
+                            </div>
+                            
+                            
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -86,6 +99,30 @@
 
     <!-- Script -->
     <script>
+        const pickr = Pickr.create({
+            el: '#warnaPicker',
+            theme: 'classic', // classic / nano / monolith
+            default: '#198754',
+            components: {
+                preview: true,
+                opacity: true,
+                hue: true,
+                interaction: {
+                    hex: true,
+                    rgba: true,
+                    input: true,
+                    clear: true,
+                    save: true
+                }
+            }
+        });
+        
+        pickr.on('save', (color, instance) => {
+            document.getElementById('warna').value = color.toHEXA().toString();
+            pickr.hide();
+        });
+        </script>
+    <script>
         // Buka modal untuk edit
         $(document).on('click', '.btn-edit', function() {
             $('#ruanganModalLabel').text('Edit Ruangan');
@@ -93,6 +130,8 @@
             $('#nama').val($(this).data('nama'));
             $('#max_jam').val($(this).data('max'));
             $('#ruanganModal').modal('show');
+            $('#warna').val($(this).data('warna'));
+
         });
 
         // Submit form (Tambah/Edit)
@@ -110,7 +149,9 @@
                     _token: $('input[name="_token"]').val(),
                     _method: method,
                     nama: $('#nama').val(),
-                    max_jam: $('#max_jam').val()
+                    max_jam: $('#max_jam').val(),
+                    warna: $('#warna').val()
+                    
                 },
                 success: function(response) {
                     Swal.fire('Berhasil!', response.message, 'success').then(() => {

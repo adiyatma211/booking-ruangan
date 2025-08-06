@@ -1,4 +1,5 @@
 @extends('layouts.base')
+
 @section('content')
     <div class="page-heading">
         <h3>Daftar Ruangan</h3>
@@ -33,22 +34,21 @@
     <div class="row">
         @foreach ($ruangans as $ruangan)
             @php
-                // Simulasi kondisi ruangan penuh (nanti dari controller)
                 $penuh = $ruangan->is_full ?? false;
+                $route = route('kalender', $ruangan->id);
             @endphp
             <div class="col-md-4">
-                <div class="card shadow-sm mb-4 {{ $penuh ? 'bg-light border-danger' : '' }}" style="cursor:pointer;"
-                    onclick="window.location.href='{{ route('kalender', $ruangan->id) }}'">
+                <div class="card shadow-sm mb-4 {{ $penuh ? 'bg-light border-danger' : '' }}"
+                    style="cursor:pointer;" onclick="window.location.href='{{ $route }}'">
                     <div class="card-body">
-                        <h5 class="card-title d-flex justify-content-between">
+                        <h5 class="card-title d-flex justify-content-between align-items-center">
                             {{ $ruangan->nama }}
                             <span class="badge {{ $penuh ? 'bg-danger' : 'bg-success' }}">
                                 {{ $penuh ? 'Penuh' : 'Tersedia' }}
                             </span>
                         </h5>
                         <p class="card-text">Maksimal: {{ $ruangan->max_jam }} jam</p>
-                        <a href="{{ route('kalender', $ruangan->id) }}" class="btn btn-primary mt-2">Lihat
-                            Jadwal</a>
+                        <a href="{{ $route }}" onclick="event.stopPropagation()" class="btn btn-primary mt-2">Lihat Jadwal</a>
                     </div>
                 </div>
             </div>

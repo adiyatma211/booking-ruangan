@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\Parameter\ParameterController;
 
 Route::get('/', function () {
@@ -22,7 +23,19 @@ Route::get(uri: '/kalender', action: function () {
     return view(view: 'booking.v_calender');
 });
 
-Route::get('/booking', [PagesController::class, 'inquiryRuangan'])->name('kalender');
+
+Route::prefix('booking')->middleware(['auth'])->group(function () {
+    // Halaman awal (pilih ruangan)
+    Route::get('/', [PagesController::class, 'inquiryRuangan'])->name('kalender');
+    // Halaman kalender pemesanan per ruangan
+    Route::get('/kalender/{ruangan}', [PemesananController::class, 'kalender'])->name('kalender');
+    // Submit pemesanan
+    Route::post('/store', [PemesananController::class, 'pemesananRuang'])->name('pemesanan.store');
+    // Ambil data event (pemesanan) untuk FullCalendar
+    Route::get('/events', [PemesananController::class, 'getEvents'])->name('pemesanan.events');
+});
+
+
 
 
 Route::prefix('ruangan')->group(function () {

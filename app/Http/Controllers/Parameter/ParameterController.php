@@ -229,6 +229,8 @@ class ParameterController extends Controller
             ruangan::create([
                 'nama'     => $request->nama,
                 'max_jam'  => $request->max_jam,
+                'warna'  => $request->warna,
+                
             ]);
 
             return response()->json([
@@ -263,6 +265,7 @@ class ParameterController extends Controller
             $ruangan->update([
                 'nama'     => $request->nama,
                 'max_jam'  => $request->max_jam,
+                'warna'  => $request->warna,
             ]);
 
             return response()->json([

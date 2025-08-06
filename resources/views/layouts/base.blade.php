@@ -20,7 +20,9 @@
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app-dark.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/iconly.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/> 
+    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.css"> --}}
+    
 </head>
 
 <style>
@@ -55,6 +57,7 @@
     <script src="{{ asset('dist/assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('dist/assets/static/js/pages/datatables.js') }}"></script>
     <script src="{{ asset('dist/assets/static/js/initTheme.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
     <div id="app">
         <div id="sidebar">
             <div class="sidebar-wrapper active">
@@ -193,18 +196,12 @@
             </footer>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('dist/assets/static/js/components/dark.js') }}"></script>
     <script src="{{ asset('dist/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
     <script src="{{ asset('js/all-js.js') }}"></script>
-
     <script src="{{ asset('dist/assets/compiled/js/app.js') }}"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-
-
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js'></script>
     <!-- Need: Apexcharts -->
     <script src="{{ asset('dist/assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
     <script src="{{ asset('dist/assets/static/js/pages/dashboard.js') }}"></script>
