@@ -20,9 +20,10 @@
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app-dark.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/iconly.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.css"> --}}
-    
+
 </head>
 
 <style>
@@ -58,6 +59,7 @@
     <script src="{{ asset('dist/assets/static/js/pages/datatables.js') }}"></script>
     <script src="{{ asset('dist/assets/static/js/initTheme.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <div id="app">
         <div id="sidebar">
             <div class="sidebar-wrapper active">
