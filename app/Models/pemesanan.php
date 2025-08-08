@@ -17,7 +17,7 @@ class pemesanan extends Model
 
     public function ruangan()
     {
-        return $this->belongsTo(Ruangan::class, 'ruangan_id');
+        return $this->belongsTo(ruangan::class, 'ruangan_id');
     }
    public function pemesan(){ return $this->belongsTo(User::class, 'nama_pemesan_id'); }
 
