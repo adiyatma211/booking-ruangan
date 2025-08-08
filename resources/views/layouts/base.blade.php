@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/iconly.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.css"> --}}
 
 </head>
@@ -60,14 +61,15 @@
     <script src="{{ asset('dist/assets/static/js/initTheme.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <div id="app">
         <div id="sidebar">
             <div class="sidebar-wrapper active">
                 <div class="sidebar-header position-relative">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="logo">
-                            <a href="#"><img src="{{ asset('dist/assets/compiled/svg/logo.svg') }}"
-                                    alt="Logo" srcset=""></a>
+                            <a href="/"><img src="{{ asset('images/bri-logo.png') }}" alt="Logo"
+                                    srcset=""></a>
                         </div>
                         <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -109,69 +111,82 @@
                     <ul class="menu">
                         <li class="sidebar-title">Menu</li>
 
-                        <li class="sidebar-item {{ request()->is('/') ? 'active' : '' }}">
-                            <a href="/" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
+                        {{-- Admin & Super Admin: full menu --}}
+                        @hasanyrole('Admin|SuperAdmin')
+                            <li class="sidebar-item {{ request()->is('/') ? 'active' : '' }}">
+                                <a href="{{ route('dashboard') }}" class="sidebar-link">
+                                    <i class="bi bi-grid-fill"></i><span>Dashboard</span>
+                                </a>
+                            </li>
 
-                        <li class="sidebar-item {{ request()->is('booking*') ? 'active' : '' }}">
-                            <a href="/booking" class='sidebar-link'>
-                                <i class="bi bi-stack"></i>
-                                <span>Booking Ruangan</span>
-                            </a>
-                        </li>
+                            <li class="sidebar-item {{ request()->is('booking*') ? 'active' : '' }}">
+                                <a href="{{ route('booking.index') }}" class="sidebar-link">
+                                    <i class="bi bi-stack"></i><span>Booking Ruangan</span>
+                                </a>
+                            </li>
 
-                        <li class="sidebar-title">Report</li>
+                            <li class="sidebar-title">Report</li>
+                            <li class="sidebar-item has-sub {{ request()->is('reports*') ? 'active open' : '' }}">
+                                <a href="#" class="sidebar-link">
+                                    <i class="bi bi-book-fill"></i><span>Report Ruangan</span>
+                                </a>
+                                <ul class="submenu mt-2">
+                                    <li class="submenu-item">
+                                        <a href="{{ route('reports.ruangan.index') }}"
+                                            class="submenu-link {{ request()->is('reports/ruangan') ? 'active' : '' }}">
+                                            Report Penggunaan Ruangan
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
 
-                        <li class="sidebar-item has-sub {{ request()->is('reportRuangan*') ? 'active open' : '' }}">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-book-fill"></i>
-                                <span>Report Ruangan</span>
-                            </a>
-                            <ul class="submenu mt-2">
-                                <li class="submenu-item">
-                                    <a href="/reportRuangan"
-                                        class="submenu-link {{ request()->is('reportRuangan') ? 'active' : '' }}">
-                                        Report Penggunaan Ruangan
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                            <li class="sidebar-title">Options</li>
+                            <li
+                                class="sidebar-item has-sub {{ request()->is('ruangan*') || request()->is('users*') || request()->is('roles*') ? 'active open' : '' }}">
+                                <a href="#" class="sidebar-link">
+                                    <i class="bi bi-hexagon-fill"></i><span>Management Parameter</span>
+                                </a>
+                                <ul class="submenu mt-2">
+                                    <li class="submenu-item">
+                                        <a href="{{ route('ruangan.index') }}"
+                                            class="submenu-link {{ request()->is('ruangan*') ? 'active' : '' }}">
+                                            Management Ruangan
+                                        </a>
+                                    </li>
+                                    <li class="submenu-item">
+                                        <a href="{{ route('users.index') }}"
+                                            class="submenu-link {{ request()->is('users*') ? 'active' : '' }}">
+                                            Management User
+                                        </a>
+                                    </li>
+                                    <li class="submenu-item">
+                                        <a href="{{ route('roles.index') }}"
+                                            class="submenu-link {{ request()->is('roles*') ? 'active' : '' }}">
+                                            Management Roles
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @else
+                            {{-- Staff / role lain: hanya Booking + Account --}}
+                            <li class="sidebar-item {{ request()->is('booking*') ? 'active' : '' }}">
+                                <a href="{{ route('booking.index') }}" class="sidebar-link">
+                                    <i class="bi bi-stack"></i><span>Booking Ruangan</span>
+                                </a>
+                            </li>
+                        @endhasanyrole
 
-                        <li class="sidebar-title">Options</li>
-
-                        <li
-                            class="sidebar-item has-sub {{ request()->is('ruangan*') || request()->is('users*') || request()->is('roles*') ? 'active open' : '' }}">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-hexagon-fill"></i>
-                                <span>Management Parameter</span>
-                            </a>
-                            <ul class="submenu mt-2">
-                                <li class="submenu-item">
-                                    <a href="/ruangan"
-                                        class="submenu-link {{ request()->is('ruangan*') ? 'active' : '' }}">
-                                        Management Ruangan
-                                    </a>
-                                </li>
-                                <li class="submenu-item">
-                                    <a href="/users"
-                                        class="submenu-link {{ request()->is('users*') ? 'active' : '' }}">
-                                        Management User
-                                    </a>
-                                </li>
-                                <li class="submenu-item">
-                                    <a href="/roles"
-                                        class="submenu-link {{ request()->is('roles*') ? 'active' : '' }}">
-                                        Management Roles
-                                    </a>
-                                </li>
-                            </ul>
+                        <li class="sidebar-title">Account</li>
+                        <li class="sidebar-item">
+                            <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                                @csrf
+                                <button type="submit" class="sidebar-link btn btn-link w-100 text-start">
+                                    <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
-
             </div>
         </div>
         <div id="main">
@@ -180,9 +195,9 @@
                     <i class="bi bi-justify fs-3"></i>
                 </a>
             </header>
-
-            <div class="page-heading">
-                <h3>Welcome Yaunita Semangat Pagi</h3>
+            <div class="page-heading d-flex justify-content-between align-items-center">
+                <h3>Welcome {{ Auth::user()->name }}</h3>
+                <h3>{{ now()->translatedFormat('l, d F Y') }}</h3>
             </div>
             @yield('content')
             <footer>

@@ -19,10 +19,13 @@ class pemesanan extends Model
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id');
     }
-    
+   public function pemesan(){ return $this->belongsTo(User::class, 'nama_pemesan_id'); }
+
+
     public function user()
     {
         return $this->belongsTo(User::class, 'nama_pemesan_id'); // sesuaikan foreign key
     }
+
 
 }

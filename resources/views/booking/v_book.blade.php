@@ -6,10 +6,21 @@
         <p class="text-subtitle text-muted">Klik ruangan untuk melihat jadwal pemesanan</p>
     </div>
 
-    <!-- Card Pencarian -->
+    @php
+        // Ambil opsi durasi unik dari DB
+        $durasiOptions = collect($ruangans)
+            ->pluck('max_jam')
+            ->filter(fn($v) => is_numeric($v) && (int) $v > 0)
+            ->map(fn($v) => (int) $v)
+            ->unique()
+            ->sort()
+            ->values();
+    @endphp
+
+    <!-- Filter Pencarian -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <form class="row g-3">
+            <form id="filterForm" class="row g-3">
                 <div class="col-md-6">
                     <label for="search" class="form-label">Cari Ruangan</label>
                     <input type="text" class="form-control" id="search" placeholder="Masukkan nama ruangan...">
@@ -17,32 +28,28 @@
                 <div class="col-md-3">
                     <label for="durasi" class="form-label">Durasi Maksimal</label>
                     <select id="durasi" class="form-select">
-                        <option selected>Semua</option>
-                        <option value="1">1 jam</option>
-                        <option value="2">2 jam</option>
-                        <option value="4">4 jam</option>
+                        <option value="" selected>Semua</option>
+                        @foreach ($durasiOptions as $opt)
+                            <option value="{{ $opt }}">{{ $opt }} jam</option>
+                        @endforeach
                     </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Cari</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Card Daftar Ruangan -->
+    <!-- Daftar Ruangan -->
     <div class="row">
         @foreach ($ruangans as $ruangan)
             @php
                 $penuh = $ruangan->is_full ?? false;
                 $gaps = $ruangan->available_gaps ?? [];
-                $merged = $ruangan->merged_bookings ?? []; // isi di controller: [['from'=>'12:50','to'=>'13:50'], ...]
+                $merged = $ruangan->merged_bookings ?? [];
                 $route = route('kalender', $ruangan->id);
 
                 $badgeClass = $penuh ? 'bg-danger' : 'bg-success';
                 $badgeText = $penuh ? 'Penuh' : 'Tersedia';
 
-                // Ubah data ke string simpel utk data-attr (hindari HTML/quote issues)
                 $bookLines = collect($merged)
                     ->map(fn($b) => ($b['from'] ?? '') . '–' . ($b['to'] ?? ''))
                     ->filter()
@@ -53,13 +60,13 @@
                     ->implode('|');
             @endphp
 
-            <div class="col-md-4">
+            <div class="col-md-4 room-card" data-name="{{ strtolower($ruangan->nama) }}"
+                data-maxjam="{{ (int) $ruangan->max_jam }}">
                 <div class="card shadow-sm mb-4 {{ $penuh ? 'bg-light border-danger' : '' }}" style="cursor:pointer;"
                     onclick="window.location.href='{{ $route }}'">
                     <div class="card-body">
                         <h5 class="card-title d-flex justify-content-between align-items-center">
                             <span>{{ $ruangan->nama }}</span>
-
                             <span class="badge {{ $badgeClass }}" data-has-tooltip="1" data-bookings="{{ $bookLines }}"
                                 data-gaps="{{ $gapLines }}">
                                 {{ $badgeText }}
@@ -77,11 +84,12 @@
                                 @endforeach
                             </div>
                         @elseif($penuh)
-                            <div class="small text-muted">Tidak ada slot di jam operasional.</div>
+                            <div class="small text-muted">Tidak ada kuota di jam operasional.</div>
                         @endif
 
-                        <a href="{{ $route }}" onclick="event.stopPropagation()" class="btn btn-primary mt-3">Lihat
-                            Jadwal</a>
+                        <a href="{{ $route }}" onclick="event.stopPropagation()" class="btn btn-primary mt-3">
+                            Lihat Jadwal
+                        </a>
                     </div>
                 </div>
             </div>
@@ -93,13 +101,12 @@
             max-width: 300px;
             text-align: left;
             white-space: nowrap;
-            /* tiap rentang satu baris */
         }
     </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Pastikan Bootstrap 5 bundle sudah terload (harus include bootstrap.bundle.min.js)
+            // Tooltip
             document.querySelectorAll('[data-has-tooltip="1"]').forEach(function(el) {
                 const books = (el.getAttribute('data-bookings') || '').split('|').filter(Boolean);
                 const gaps = (el.getAttribute('data-gaps') || '').split('|').filter(Boolean);
@@ -125,6 +132,42 @@
                     trigger: 'hover focus'
                 });
             });
+
+            // Filter
+            const form = document.getElementById('filterForm');
+            const search = document.getElementById('search');
+            const durasi = document.getElementById('durasi');
+            const cards = Array.from(document.querySelectorAll('.room-card'));
+
+            function normalize(str) {
+                return (str || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            function applyFilter() {
+                const q = normalize(search.value);
+                const minJam = durasi.value ? parseInt(durasi.value, 10) : null;
+
+                cards.forEach(card => {
+                    const name = normalize(card.dataset.name || '');
+                    const maxJam = parseInt(card.dataset.maxjam || '0', 10);
+                    const matchName = !q || name.includes(q);
+                    const matchDur = (minJam === null) || (maxJam >= minJam);
+                    card.classList.toggle('d-none', !(matchName && matchDur));
+                });
+            }
+
+            const debounced = (fn, ms = 150) => {
+                let t;
+                return (...a) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn(...a), ms);
+                };
+            };
+
+            search.addEventListener('input', debounced(applyFilter, 150));
+            durasi.addEventListener('change', applyFilter);
+            form.addEventListener('submit', e => e.preventDefault());
+            applyFilter();
         });
     </script>
 @endsection
