@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PemesananController;
+use App\Http\Controllers\ReportRuanganController;
 use App\Http\Controllers\Parameter\ParameterController;
 
 Route::get('/', [PagesController::class, 'dashboard']);
@@ -36,32 +37,48 @@ Route::prefix('booking')->middleware(['auth'])->group(function () {
 
 
 
-Route::prefix('ruangan')->group(function () {
-    Route::get('/', [PagesController::class, 'getRuangan'])->name('ruangan.index');
-    Route::post('/store', [ParameterController::class, 'simpanRuangan'])->name('ruangan.store');
-    Route::put('/update/{id}', [ParameterController::class, 'updateRuangan'])->name('ruangan.update');
-    Route::delete('/delete/{id}', [ParameterController::class, 'hapusRuangan'])->name('ruangan.destroy');
+    /**
+     * Ruangan
+     */
+    Route::prefix('ruangan')->group(function () {
+        Route::get('/', [PagesController::class, 'getRuangan'])->name('ruangan.index');
+        Route::post('/store', [ParameterController::class, 'simpanRuangan'])->name('ruangan.store');
+        Route::put('/update/{id}', [ParameterController::class, 'updateRuangan'])->name('ruangan.update');
+        Route::delete('/delete/{id}', [ParameterController::class, 'hapusRuangan'])->name('ruangan.destroy');
+    });
+
+    /**
+     * Report Ruangan
+     */
+    Route::prefix('reports')->group(function () {
+        Route::get('/ruangan', [ReportRuanganController::class, 'index'])->name('reports.ruangan.index');
+        Route::get('/ruangan/data', [ReportRuanganController::class, 'data'])->name('reports.ruangan.data');
+        Route::get('/ruangan/export', [ReportRuanganController::class, 'exportCsv'])->name('reports.ruangan.export');
+    });
+
+    /**
+     * Users
+     */
+    Route::prefix('users')->group(function () {
+        Route::get('/', [PagesController::class, 'getUsers'])->name('users.index');
+        Route::post('/store', [ParameterController::class, 'TambahUsers'])->name('users.store');
+        Route::put('/update/{id}', [ParameterController::class, 'updateUsers'])->name('users.update');
+        Route::delete('/delete/{id}', [ParameterController::class, 'destroy'])->name('users.destroy');
+    });
+
+    /**
+     * Roles
+     */
+    Route::get('/roles',[PagesController::class,'getRoles'])->name('roles.index');
+    Route::post('/roles/tambah', [ParameterController::class, 'TambahRoles'])->name('parameter.tambah.roles');
+    Route::put('/roles/update/{id}', [ParameterController::class, 'UpdateRoles'])->name('parameter.update.roles');
+    Route::post('/roles/tambah', [ParameterController::class, 'TambahRoles'])->name('parameter.tambah.roles');
+    Route::delete('/roles/delete/{id}', [ParameterController::class, 'DeleteRole'])->name('parameter.delete.roles');
+
+
 });
-Route::get('/users', [PagesController::class, 'getUsers'])->name('users.index');
-Route::post('/users/store', [ParameterController::class, 'TambahUsers'])->name('users.store');
-Route::put('/users/update/{id}', [ParameterController::class, 'updateUsers'])->name('users.update');
-Route::delete('/users/delete/{id}', [ParameterController::class, 'destroy'])->name('users.destroy');
 
 
-
-Route::get('/roles',[PagesController::class,'getRoles']);
-Route::post('/roles/tambah', [ParameterController::class, 'TambahRoles'])->name('parameter.tambah.roles');
-Route::put('/roles/update/{id}', [ParameterController::class, 'UpdateRoles'])->name('parameter.update.roles');
-Route::post('/roles/tambah', [ParameterController::class, 'TambahRoles'])->name('parameter.tambah.roles');
-Route::delete('/roles/delete/{id}', [ParameterController::class, 'DeleteRole'])->name('parameter.delete.roles');
-
-
-
-
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

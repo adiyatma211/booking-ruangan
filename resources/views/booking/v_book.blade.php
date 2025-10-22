@@ -6,7 +6,18 @@
         <p class="text-subtitle text-muted">Klik ruangan untuk melihat jadwal pemesanan</p>
     </div>
 
-    <!-- Card Pencarian -->
+    @php
+        // Ambil opsi durasi unik dari DB
+        $durasiOptions = collect($ruangans)
+            ->pluck('max_jam')
+            ->filter(fn($v) => is_numeric($v) && (int) $v > 0)
+            ->map(fn($v) => (int) $v)
+            ->unique()
+            ->sort()
+            ->values();
+    @endphp
+
+    <!-- Filter Pencarian -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <div class="row g-3 align-items-end">
@@ -36,25 +47,56 @@
         </div>
     </div>
 
-    <!-- Card Daftar Ruangan -->
+    <!-- Daftar Ruangan -->
     <div class="row">
         @foreach ($ruangans as $ruangan)
             @php
                 $penuh = $ruangan->is_full ?? false;
+                $gaps = $ruangan->available_gaps ?? [];
+                $merged = $ruangan->merged_bookings ?? [];
                 $route = route('kalender', $ruangan->id);
+
+                $badgeClass = $penuh ? 'bg-danger' : 'bg-success';
+                $badgeText = $penuh ? 'Penuh' : 'Tersedia';
+
+                $bookLines = collect($merged)
+                    ->map(fn($b) => ($b['from'] ?? '') . '–' . ($b['to'] ?? ''))
+                    ->filter()
+                    ->implode('|');
+                $gapLines = collect($gaps)
+                    ->map(fn($g) => ($g['from'] ?? '') . '–' . ($g['to'] ?? ''))
+                    ->filter()
+                    ->implode('|');
             @endphp
             <div class="col-md-4 room-col" data-name="{{ strtolower($ruangan->nama) }}" data-max-jam="{{ $ruangan->max_jam }}" data-status="{{ $penuh ? 'penuh' : 'tersedia' }}">
                 <div class="card shadow-sm mb-4 room-card {{ $penuh ? 'bg-light border-danger' : '' }}"
                     style="cursor:pointer; transition: transform .12s ease, box-shadow .12s ease;" onclick="window.location.href='{{ $route }}'">
                     <div class="card-body">
                         <h5 class="card-title d-flex justify-content-between align-items-center">
-                            {{ $ruangan->nama }}
-                            <span class="badge {{ $penuh ? 'bg-danger' : 'bg-success' }}">
-                                {{ $penuh ? 'Penuh' : 'Tersedia' }}
+                            <span>{{ $ruangan->nama }}</span>
+                            <span class="badge {{ $badgeClass }}" data-has-tooltip="1" data-bookings="{{ $bookLines }}"
+                                data-gaps="{{ $gapLines }}">
+                                {{ $badgeText }}
                             </span>
                         </h5>
-                        <p class="card-text">Maksimal: {{ $ruangan->max_jam }} jam</p>
-                        <a href="{{ $route }}" onclick="event.stopPropagation()" class="btn btn-primary mt-2">Lihat Jadwal</a>
+
+                        <p class="card-text mb-2">Maksimal: {{ $ruangan->max_jam }} jam</p>
+
+                        @if (!$penuh && !empty($gaps))
+                            <div class="small text-muted mb-1">Jam Tersedia Hari ini:</div>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach ($gaps as $g)
+                                    <span
+                                        class="badge bg-light text-dark border">{{ $g['from'] }}–{{ $g['to'] }}</span>
+                                @endforeach
+                            </div>
+                        @elseif($penuh)
+                            <div class="small text-muted">Tidak ada kuota di jam operasional.</div>
+                        @endif
+
+                        <a href="{{ $route }}" onclick="event.stopPropagation()" class="btn btn-primary mt-3">
+                            Lihat Jadwal
+                        </a>
                     </div>
                 </div>
             </div>

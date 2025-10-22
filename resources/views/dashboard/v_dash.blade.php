@@ -175,6 +175,7 @@
                     <div class="card-header">
                         <h4>Recent Booking User</h4>
                     </div>
+
                     <div class="card-content pb-4">
                         @forelse($recentBookings ?? [] as $b)
                             <div class="recent-message d-flex px-4 py-3">
@@ -195,17 +196,178 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Visitors Profile</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart-visitors-profile"></div>
-                    </div>
-                </div>
             </div>
         </section>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const elChart = document.getElementById('chart-booking');
+            const form = document.getElementById('chartFilter');
+            const inputStart = document.getElementById('start');
+            const inputEnd = document.getElementById('end');
+            const selType = document.getElementById('chartType');
+
+            // Inisialisasi chart kosong
+            const isDark = document.documentElement.classList.contains('dark');
+            let chart = new ApexCharts(elChart, {
+                chart: {
+                    type: 'area',
+                    height: 320,
+                    toolbar: {
+                        show: false
+                    },
+                    fontFamily: 'inherit'
+                },
+                series: [{
+                    name: 'Booking',
+                    data: []
+                }],
+                xaxis: {
+                    categories: []
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 2
+                },
+                markers: {
+                    size: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.35,
+                        opacityTo: 0.05
+                    }
+                },
+                grid: {
+                    strokeDashArray: 4
+                },
+                theme: {
+                    mode: isDark ? 'dark' : 'light'
+                },
+                tooltip: {
+                    x: {
+                        formatter: (val) => {
+                            if (!val) return '';
+                            const [y, m, d] = val.split('-');
+                            const dt = new Date(`${y}-${m}-${d}T00:00:00`);
+                            return dt.toLocaleDateString('id-ID', {
+                                weekday: 'long',
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
+                    },
+                    y: {
+                        formatter: (v) => `${v} booking`
+                    }
+                },
+                xaxis: {
+                    categories: [],
+                    labels: {
+                        rotate: -15,
+                        formatter: (val) => {
+                            if (!val) return '';
+                            const [y, m, d] = val.split('-');
+                            const dt = new Date(`${y}-${m}-${d}T00:00:00`);
+                            return dt.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short'
+                            });
+                        }
+                    },
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: (v) => Math.round(v)
+                    }
+                },
+            });
+            chart.render();
+
+            function buildUrl() {
+                const params = new URLSearchParams();
+                if (inputStart.value) params.set('start', inputStart.value);
+                if (inputEnd.value) params.set('end', inputEnd.value);
+                return `{{ route('dashboard.chart') }}?` + params.toString();
+            }
+
+            async function loadChart(e) {
+                if (e) e.preventDefault();
+                try {
+                    const res = await fetch(buildUrl(), {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const json = await res.json();
+
+                    // Update data
+                    await chart.updateOptions({
+                        chart: {
+                            type: selType.value || 'area'
+                        },
+                        xaxis: {
+                            categories: json.labels || []
+                        }
+                    });
+                    await chart.updateSeries([{
+                        name: 'Booking',
+                        data: json.series || []
+                    }]);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            // Apply filter
+            form.addEventListener('submit', loadChart);
+            // Ubah tipe chart on-change tanpa submit
+            selType.addEventListener('change', () => chart.updateOptions({
+                chart: {
+                    type: selType.value
+                }
+            }));
+
+            // Load awal (default 14 hari)
+            loadChart();
+        });
+    </script>
+
+    <script>
+        $(function() {
+            $('#myBookingsTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [
+                    [0, 'desc']
+                ], // sort Tanggal terbaru ke atas
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/id.json'
+                },
+                columnDefs: [{
+                    targets: 3,
+                    render: function(data, type) {
+                        // biar pas search full text, tapi tampilan tetap ter-truncate oleh CSS
+                        return type === 'display' ? data : $('<div>' + data + '</div>').text();
+                    }
+                }]
+            });
+        });
+    </script>
 @endsection
 
 <script>
