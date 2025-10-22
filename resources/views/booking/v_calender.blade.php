@@ -6,9 +6,35 @@
         <p class="text-subtitle text-muted">Klik pada tanggal untuk melakukan pemesanan</p>
     </div>
 
-    <div class="card">
+    <div class="card mb-3">
+        <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:14px;height:14px;border-radius:3px;background: {{ $ruangan->warna }};"></div>
+                <div>
+                    <div class="fw-bold">{{ $ruangan->nama }}</div>
+                    <div class="text-muted small">Durasi maksimal: {{ $ruangan->max_jam }} jam</div>
+                </div>
+            </div>
+
+            <div class="btn-group mt-2 mt-sm-0" role="group" aria-label="Tampilan Kalender">
+                <button class="btn btn-outline-primary btn-sm" id="btnMonth">Bulan</button>
+                <button class="btn btn-outline-primary btn-sm" id="btnWeek">Minggu</button>
+                <button class="btn btn-outline-primary btn-sm" id="btnList">Daftar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card position-relative">
         <div class="card-body">
             <div id="calendar"></div>
+            <div id="calendarLoading" class="position-absolute top-0 start-0 w-100 h-100 d-none"
+                 style="background: rgba(255,255,255,0.6);">
+                <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -90,9 +116,23 @@
             const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     selectable: true,
-    height: 600,
+    height: 650,
+    locale: 'id',
+    navLinks: true,
+    headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek'
+    },
 
     displayEventTime: false,
+    buttonText: {
+        today: 'Hari ini',
+        month: 'Bulan',
+        week: 'Minggu',
+        day: 'Hari',
+        list: 'Daftar'
+    },
     eventTimeFormat: {
         hour: '2-digit',
         minute: '2-digit',
@@ -123,7 +163,16 @@
         $('#pemesananModal').modal('show');
     },
 
-    events: "{{ route('pemesanan.events') }}",
+    events: "{{ route('pemesanan.events') }}?ruangan_id={{ $ruangan->id }}",
+
+    loading: function(isLoading) {
+        const overlay = document.getElementById('calendarLoading');
+        if (isLoading) {
+            overlay.classList.remove('d-none');
+        } else {
+            overlay.classList.add('d-none');
+        }
+    },
 
     eventClick: function(info) {
         const { keperluan, jam, pic, ruangan } = info.event.extendedProps;
@@ -190,6 +239,10 @@
 });
     
             calendar.render();
+            // View switching buttons
+            document.getElementById('btnMonth').addEventListener('click', () => calendar.changeView('dayGridMonth'));
+            document.getElementById('btnWeek').addEventListener('click', () => calendar.changeView('timeGridWeek'));
+            document.getElementById('btnList').addEventListener('click', () => calendar.changeView('listWeek'));
     
             // Hitung durasi otomatis
             function hitungDurasi() {
@@ -235,7 +288,19 @@
                 }
             }
     
-            document.getElementById('jam_mulai').addEventListener('change', hitungDurasi);
+            document.getElementById('jam_mulai').addEventListener('change', function() {
+                // Auto set default 1 jam setelah jam mulai (maksimal maxJam)
+                const val = this.value;
+                if (val) {
+                    const [h, m] = val.split(':').map(Number);
+                    const end = new Date();
+                    end.setHours(h + Math.min(1, maxJam), m);
+                    const hh = String(end.getHours()).padStart(2, '0');
+                    const mm = String(end.getMinutes()).padStart(2, '0');
+                    document.getElementById('jam_selesai').value = `${hh}:${mm}`;
+                }
+                hitungDurasi();
+            });
             document.getElementById('jam_selesai').addEventListener('change', hitungDurasi);
     
             // Submit form pemesanan

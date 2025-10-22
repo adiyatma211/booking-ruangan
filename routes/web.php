@@ -6,9 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\Parameter\ParameterController;
 
-Route::get('/', function () {
-    return view('dashboard.v_dash');
-});
+Route::get('/', [PagesController::class, 'dashboard']);
 
 
 

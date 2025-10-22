@@ -14,8 +14,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Profile Views</h6>
-                                        <h6 class="font-extrabold mb-0">112.000</h6>
+                                        <h6 class="text-muted font-semibold">Total Ruangan</h6>
+                                        <h6 class="font-extrabold mb-0">{{ $roomsCount ?? 0 }}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -31,8 +31,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Followers</h6>
-                                        <h6 class="font-extrabold mb-0">183.000</h6>
+                                        <h6 class="text-muted font-semibold">Booking Hari Ini</h6>
+                                        <h6 class="font-extrabold mb-0">{{ $bookingsTodayCount ?? 0 }}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -48,8 +48,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Following</h6>
-                                        <h6 class="font-extrabold mb-0">80.000</h6>
+                                        <h6 class="text-muted font-semibold">Jam Terbooking (hari ini)</h6>
+                                        <h6 class="font-extrabold mb-0">{{ number_format($bookedHoursToday ?? 0, 1) }}<span class="text-muted" style="font-size:.8rem"> jam</span></h6>
                                     </div>
                                 </div>
                             </div>
@@ -65,10 +65,24 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Saved Post</h6>
-                                        <h6 class="font-extrabold mb-0">112</h6>
+                                        <h6 class="text-muted font-semibold">Occupancy Hari Ini</h6>
+                                        <h6 class="font-extrabold mb-0">{{ $occupancy ?? 0 }}<span class="text-muted" style="font-size:.8rem">%</span></h6>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body d-flex flex-wrap gap-2">
+                                <a class="btn btn-primary" href="/booking">Buat Booking</a>
+                                <a class="btn btn-outline-primary" href="/ruangan">Kelola Ruangan</a>
+                                <a class="btn btn-outline-secondary" href="/reportRuangan">Report Penggunaan</a>
+                                @if(!empty($nextBooking))
+                                <span class="ms-auto text-muted small">Jadwal terdekat: {{ substr($nextBooking->jam_mulai,0,5) }} - {{ substr($nextBooking->jam_selesai,0,5) }}, {{ $nextBooking->ruangan->nama ?? 'Ruangan' }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -77,10 +91,10 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Profile Visit</h4>
+                                <h4>Penggunaan 7 Hari Terakhir</h4>
                             </div>
                             <div class="card-body">
-                                <div id="chart-profile-visit"></div>
+                                <div id="chart-weekly-usage"></div>
                             </div>
                         </div>
                     </div>
@@ -89,111 +103,50 @@
                     <div class="col-12 col-xl-4">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Profile Visit</h4>
+                                <h4>Jadwal Terdekat</h4>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ asset('dist/assets/static/images/bootstrap-icons.svg#circle-fill') }}" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">Europe</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">862</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-europe"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-success" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ asset('dist/assets/static/images/bootstrap-icons.svg#circle-fill') }}" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">America</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">375</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-america"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-danger" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ asset('dist/assets/static/images/bootstrap-icons.svg#circle-fill') }}" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">Indonesia</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">1025</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-indonesia"></div>
-                                    </div>
-                                </div>
+                                <ul class="list-group">
+                                    @forelse($upcoming as $item)
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-bold">{{ \Illuminate\Support\Carbon::parse($item->tanggal)->format('d M Y') }} • {{ substr($item->jam_mulai,0,5) }}-{{ substr($item->jam_selesai,0,5) }}</div>
+                                                <div class="text-muted small">{{ $item->keperluan }} — {{ $item->ruangan->nama ?? 'Ruangan' }}</div>
+                                            </div>
+                                            <a class="btn btn-sm btn-outline-primary" href="{{ route('kalender', $item->ruangan_id) }}">Lihat</a>
+                                        </li>
+                                    @empty
+                                        <li class="list-group-item text-muted">Tidak ada jadwal.</li>
+                                    @endforelse
+                                </ul>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-xl-8">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Latest Comments</h4>
+                                <h4>Ringkasan</h4>
                             </div>
                             <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-lg">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Comment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="col-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar avatar-md">
-                                                            <img src="{{ asset('dist/assets/compiled/jpg/5.jpg') }}">
-                                                        </div>
-                                                        <p class="font-bold ms-3 mb-0">Si Cantik</p>
-                                                    </div>
-                                                </td>
-                                                <td class="col-auto">
-                                                    <p class=" mb-0">Congratulations on your graduation!</p>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar avatar-md">
-                                                            <img src="{{ asset('dist/assets/compiled/jpg/2.jpg') }}">
-                                                        </div>
-                                                        <p class="font-bold ms-3 mb-0">Si Ganteng</p>
-                                                    </div>
-                                                </td>
-                                                <td class="col-auto">
-                                                    <p class=" mb-0">Wow amazing design! Can you make another
-                                                        tutorial for
-                                                        this design?</p>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="p-3 rounded border bg-light h-100">
+                                            <div class="text-muted small">Ruangan</div>
+                                            <div class="fw-bold fs-4">{{ $roomsCount ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 rounded border bg-light h-100">
+                                            <div class="text-muted small">Booking Hari Ini</div>
+                                            <div class="fw-bold fs-4">{{ $bookingsTodayCount ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 rounded border bg-light h-100">
+                                            <div class="text-muted small">Occupancy</div>
+                                            <div class="fw-bold fs-4">{{ $occupancy ?? 0 }}%</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -205,50 +158,40 @@
                     <div class="card-body py-4 px-4">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-xl">
-                                <img src="{{ asset('dist/assets/compiled/jpg/1.jpg') }}" alt="Face 1">
+                                <img src="{{ asset('dist/assets/compiled/jpg/1.jpg') }}" alt="User">
                             </div>
                             <div class="ms-3 name">
-                                <h5 class="font-bold">John Duck</h5>
-                                <h6 class="text-muted mb-0">@johnducky</h6>
+                                <h5 class="font-bold">{{ auth()->user()->name ?? 'User' }}</h5>
+                                @php
+                                    $email = auth()->user()->email ?? null;
+                                    $handle = $email ? '@'.\Illuminate\Support\Str::before($email, '@') : '';
+                                @endphp
+                                <h6 class="text-muted mb-0">{{ $handle }}</h6>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Recent Messages</h4>
+                        <h4>Recent Booking User</h4>
                     </div>
                     <div class="card-content pb-4">
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ asset('dist/assets/compiled/jpg/4.jpg') }}">
+                        @forelse($recentBookings ?? [] as $b)
+                            <div class="recent-message d-flex px-4 py-3">
+                                <div class="avatar avatar-lg">
+                                    <img src="{{ asset('dist/assets/compiled/jpg/1.jpg') }}" alt="user">
+                                </div>
+                                <div class="name ms-4">
+                                    <h5 class="mb-1">{{ $b->user->name ?? 'User' }}</h5>
+                                    <h6 class="text-muted mb-0 small">{{ $b->keperluan }} — {{ $b->ruangan->nama ?? 'Ruangan' }}</h6>
+                                    <div class="text-muted small">{{ \Illuminate\Support\Carbon::parse($b->tanggal)->format('d M Y') }} • {{ substr($b->jam_mulai,0,5) }}-{{ substr($b->jam_selesai,0,5) }}</div>
+                                </div>
                             </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">Hank Schrader</h5>
-                                <h6 class="text-muted mb-0">@johnducky</h6>
-                            </div>
-                        </div>
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ asset('dist/assets/compiled/jpg/5.jpg') }}">
-                            </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">Dean Winchester</h5>
-                                <h6 class="text-muted mb-0">@imdean</h6>
-                            </div>
-                        </div>
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ asset('dist/assets/compiled/jpg/1.jpg') }}">
-                            </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">John Dodol</h5>
-                                <h6 class="text-muted mb-0">@dodoljohn</h6>
-                            </div>
-                        </div>
+                        @empty
+                            <div class="px-4 py-3 text-muted">Belum ada booking terbaru.</div>
+                        @endforelse
                         <div class="px-4">
-                            <button class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>Start
-                                Conversation</button>
+                            <a href="/booking" class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>Lihat Kalender</a>
                         </div>
                     </div>
                 </div>
@@ -264,3 +207,36 @@
         </section>
     </div>
 @endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.ApexCharts && document.querySelector('#chart-weekly-usage')) {
+            const labels = @json($weeklyLabels ?? []);
+            const seriesData = @json($weeklySeries ?? []);
+            const options = {
+                chart: { type: 'bar', height: 320, toolbar: { show: false } },
+                series: [{ name: 'Jam Terpakai', data: seriesData }],
+                xaxis: { categories: labels },
+                colors: ['#435ebe'],
+                dataLabels: { enabled: false },
+                tooltip: { y: { formatter: (val) => `${val} jam` } }
+            };
+            const chart = new ApexCharts(document.querySelector('#chart-weekly-usage'), options);
+            chart.render();
+        }
+
+        if (window.ApexCharts && document.querySelector('#chart-visitors-profile')) {
+            const vLabels = @json($visitorLabels ?? []);
+            const vSeries = @json($visitorSeries ?? []);
+            const donut = new ApexCharts(document.querySelector('#chart-visitors-profile'), {
+                chart: { type: 'donut', height: 300 },
+                series: vSeries,
+                labels: vLabels,
+                legend: { position: 'bottom' },
+                dataLabels: { enabled: true },
+                tooltip: { y: { formatter: (val) => `${val} jam` } }
+            });
+            donut.render();
+        }
+    });
+    </script>

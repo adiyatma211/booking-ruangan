@@ -109,9 +109,16 @@ class PemesananController extends Controller
         }
     }
 
-    public function getEvents()
+    public function getEvents(Request $request)
     {
-        $data = pemesanan::with('ruangan', 'user')->get(); // pastikan ada relasi user jika pakai Auth
+        $query = Pemesanan::with('ruangan', 'user'); // pastikan ada relasi user jika pakai Auth
+
+        // Optional filter by ruangan_id if provided
+        if ($request->filled('ruangan_id')) {
+            $query->where('ruangan_id', $request->input('ruangan_id'));
+        }
+
+        $data = $query->get();
     
         $events = $data->map(function ($item) {
             return [
